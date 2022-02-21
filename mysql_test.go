@@ -14,11 +14,6 @@ func TestOpen(t *testing.T) {
 	}
 }
 
-func TestExec(t *testing.T) {
-	prepareData()
-
-}
-
 func prepareData() {
 	db, err := Open(dataSourceName)
 	if err != nil {
