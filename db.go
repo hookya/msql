@@ -60,36 +60,36 @@ func (db *Db) SetMaxOpenConns(n int) {
 	db.db.SetMaxOpenConns(n)
 }
 
-func transform(data interface{}, rows *sql.Rows) error {
-	val := reflect.ValueOf(data)
-	// typ := reflect.TypeOf(data)
+// func transform(data interface{}, rows *sql.Rows) error {
+// 	val := reflect.ValueOf(data)
+// 	// typ := reflect.TypeOf(data)
 
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-	switch val.Kind() {
-	case reflect.Slice:
-	case reflect.Struct:
-		convertStruct(val, rows)
-	case reflect.Map:
-	default:
-		panic("un support type")
-	}
-	return nil
-}
+// 	if val.Kind() == reflect.Ptr {
+// 		val = val.Elem()
+// 	}
+// 	switch val.Kind() {
+// 	case reflect.Slice:
+// 	case reflect.Struct:
+// 		convertStruct(val, rows)
+// 	case reflect.Map:
+// 	default:
+// 		panic("un support type")
+// 	}
+// 	return nil
+// }
 
-// 结构体类型
-func convertStruct(value reflect.Value, rows *sql.Rows) {
-	// for i := 0; i < value.NumField(); i++ {
-	// 	if value.Field(i).Kind()
-	// }
-	rows.Scan()
-}
+// // 结构体类型
+// func convertStruct(value reflect.Value, rows *sql.Rows) {
+// 	// for i := 0; i < value.NumField(); i++ {
+// 	// 	if value.Field(i).Kind()
+// 	// }
+// 	rows.Scan()
+// }
 
-// 基础类型
-func convertBase(typ reflect.Value, rows *sql.Rows) {
-	switch typ.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int16, reflect.Int64:
+// // 基础类型
+// func convertBase(typ reflect.Value, rows *sql.Rows) {
+// 	switch typ.Kind() {
+// 	case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int16, reflect.Int64:
 
-	}
-}
+// 	}
+// }

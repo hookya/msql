@@ -27,10 +27,23 @@ func TestQuery(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	user := User{}
-	err = db.Query(&user, fmt.Sprintf(`SELECT * FROM users WHERE name = "%s"`, `张三`))
+	//user := User{}
+	var id int64 = 0
+	err = db.Query(&id, fmt.Sprintf(`SELECT id FROM users WHERE name = "%s"`, `李四`))
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(`aaa`)
+	var name string
+	err = db.Query(&name, fmt.Sprintf(`SELECT name FROM users WHERE id = %d`, 4))
+	if err != nil {
+		panic(err)
+	}
+	var names []string
+	err = db.Query(&names, fmt.Sprintf(`SELECT name FROM users`))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(id)
+	fmt.Println(name)
+	fmt.Println(names)
 }

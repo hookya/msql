@@ -19,17 +19,48 @@ func Scan(rows *sql.Rows, data interface{}) error {
 	}
 	ptr := reflect.ValueOf(data)
 	if ptr.Kind() != reflect.Ptr {
-		return errors.New("msql: data must be a pointer.")
+		return errors.New("msql: data must be a pointer")
 	}
 	if ptr.IsNil() {
-		return errors.New("msql: data is a nil pointer.")
+		return errors.New("msql: data is a nil pointer")
 	}
 	columns, err := rows.ColumnTypes()
 	if err != nil {
 		return err
 	}
 	if len(columns) == 0 {
-		return errors.New("msql: no columns.")
+		return errors.New("msql: no columns")
+	}
+	target := ptr.Elem()
+	switch target.Kind() {
+	case reflect.Slice:
+		typ := target.Type().Elem()
+		for rows.Next() {
+			elem := reflect.New(typ).Elem()
+			if err := ScanRow(rows, elem); err != nil {
+				return err
+			}
+			target.Set(reflect.Append(target, elem))
+		}
+	default:
+		if rows.Next() {
+			if err := ScanRow(rows, target); err != nil {
+				return err
+			}
+		}
+
+	}
+	return nil
+}
+
+func ScanRow(rows *sql.Rows, target reflect.Value) error {
+	switch target.Kind() {
+	case reflect.Struct:
+	case reflect.Map:
+	default:
+		if err := rows.Scan(&baseScanner{target}); err != nil {
+			return err
+		}
 	}
 	return nil
 }
