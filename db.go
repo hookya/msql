@@ -44,6 +44,35 @@ func (db *Db) ExecCtx(ctx context.Context, query string, args ...interface{}) (s
 	return db.db.ExecContext(ctx, query, args...)
 }
 
+func (db *Db) RunInTrans(fn func(*Tx) error) error {
+	ctx, cancel := context.WithTimeout(context.Background(), db.timeout)
+	defer cancel()
+	return db.RunInTransCtx(ctx, fn)
+}
+
+func (db *Db) RunInTransCtx(ctx context.Context, fn func(*Tx) error) error {
+	_tx, err := db.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	tx := &Tx{tx: _tx, timeout: defaultTimeout}
+	defer func() {
+		if err := recover(); err != nil {
+			_ = tx.tx.Rollback()
+			panic(err)
+		}
+	}()
+	if err = fn(tx); err != nil {
+		err = tx.tx.Rollback()
+		return err
+	}
+	if err = tx.tx.Commit(); err != nil {
+		_ = tx.tx.Rollback()
+		return err
+	}
+	return nil
+}
+
 func (db *Db) SetConnMaxIdleTime(d time.Duration) {
 	db.db.SetConnMaxIdleTime(d)
 }
@@ -59,37 +88,3 @@ func (db *Db) SetMaxIdleConns(n int) {
 func (db *Db) SetMaxOpenConns(n int) {
 	db.db.SetMaxOpenConns(n)
 }
-
-// func transform(data interface{}, rows *sql.Rows) error {
-// 	val := reflect.ValueOf(data)
-// 	// typ := reflect.TypeOf(data)
-
-// 	if val.Kind() == reflect.Ptr {
-// 		val = val.Elem()
-// 	}
-// 	switch val.Kind() {
-// 	case reflect.Slice:
-// 	case reflect.Struct:
-// 		convertStruct(val, rows)
-// 	case reflect.Map:
-// 	default:
-// 		panic("un support type")
-// 	}
-// 	return nil
-// }
-
-// // 结构体类型
-// func convertStruct(value reflect.Value, rows *sql.Rows) {
-// 	// for i := 0; i < value.NumField(); i++ {
-// 	// 	if value.Field(i).Kind()
-// 	// }
-// 	rows.Scan()
-// }
-
-// // 基础类型
-// func convertBase(typ reflect.Value, rows *sql.Rows) {
-// 	switch typ.Kind() {
-// 	case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int16, reflect.Int64:
-
-// 	}
-// }

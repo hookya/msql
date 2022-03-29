@@ -10,8 +10,8 @@ import (
 type DbOrTx interface {
 	ExecCtx(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 	Exec(query string, args ...interface{}) (sql.Result, error)
-	Query(data interface{}, query string, args ...string)
-	QueryCtx(ctx context.Context, data interface{}, query string, args ...string) error
+	Query(data interface{}, query string, args ...interface{}) error
+	QueryCtx(ctx context.Context, data interface{}, query string, args ...interface{}) error
 }
 
 func Open(dataSourceName string) (*Db, error) {

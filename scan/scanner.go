@@ -60,6 +60,18 @@ func (scanner *baseScanner) Scan(src interface{}) error {
 			scanner.dest.SetString(string(v))
 			return nil
 		}
+	case reflect.Bool:
+		if src == nil {
+			return fmt.Errorf("converting NULL to %s is unsupported", scanner.dest.Kind())
+		}
+		s := asString(src)
+		b, err := strconv.ParseBool(s)
+		if err != nil {
+			err = strconvErr(err)
+			return fmt.Errorf("converting driver.Value type %T (%q) to a %s: %v", src, s, scanner.dest.Kind(), err)
+		}
+		scanner.dest.SetBool(b)
+		return nil
 	}
 	return fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T", src, scanner.dest.Interface())
 }
@@ -71,6 +83,7 @@ func asString(src interface{}) string {
 	case []byte:
 		return string(v)
 	}
+
 	rv := reflect.ValueOf(src)
 	switch rv.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
